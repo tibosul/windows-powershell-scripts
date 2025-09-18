@@ -24,6 +24,8 @@ function Show-Menu {
     Write-Host "  [13] 🔄 Repornire servicii Windows blocat" -ForegroundColor White
     Write-Host "  [14] 🗑️  Uninstall bloatware Windows 11" -ForegroundColor White
     Write-Host "  [15] 📸 Screenshot toate erorile din Event Log" -ForegroundColor White
+    Write-Host "  [16] 🔧 Actualizare automată drivere" -ForegroundColor White
+    Write-Host "  [17] 🌡️ Monitorizare temperatură sistem" -ForegroundColor White
     Write-Host ""
     Write-Host "  [0] ❌ Ieșire" -ForegroundColor Red
     Write-Host ""
@@ -296,15 +298,15 @@ function Install-VCRedist {
     
     # Raport final
     if ($installedCount -eq $totalCount) {
-        Write-Host "✅ Toate C++ Redistributables sunt instalate! ($installedCount/$totalCount)" -ForegroundColor Green
+        Write-Host "[OK] Toate C++ Redistributables sunt instalate! ($installedCount/$totalCount)" -ForegroundColor Green
     } else {
-        Write-Host "⚠️ Unele C++ Redistributables lipsesc ($installedCount/$totalCount instalate)" -ForegroundColor Yellow
-        Write-Host "💡 Poți descărca manual de la Microsoft" -ForegroundColor Cyan
+        Write-Host "[WARN] Unele C++ Redistributables lipsesc ($installedCount/$totalCount instalate)" -ForegroundColor Yellow
+        Write-Host "[INFO] Poti descarca manual de la Microsoft" -ForegroundColor Cyan
     }
 }
 
 function Restart-WindowsServices {
-    Write-Host "`n🔄 REPORNIRE SERVICII WINDOWS..." -ForegroundColor Yellow
+    Write-Host "`n[RESTART] REPORNIRE SERVICII WINDOWS..." -ForegroundColor Yellow
     
     $criticalServices = @(
         @{Name="wuauserv"; DisplayName="Windows Update"},
@@ -497,6 +499,14 @@ do {
         '13' { Restart-WindowsServices }
         '14' { Remove-Bloatware }
         '15' { Export-EventLogs }
+        '16' {
+            Write-Host "`n🔧 ACTUALIZARE DRIVERE..." -ForegroundColor Yellow
+            & "$PSScriptRoot\DriverUpdateAutomation.ps1"
+        }
+        '17' {
+            Write-Host "`n🌡️ MONITORIZARE TEMPERATURĂ..." -ForegroundColor Yellow
+            & "$PSScriptRoot\SystemTemperatureMonitoring.ps1"
+        }
         '0' {
             Write-Host "`n👋 La revedere!" -ForegroundColor Cyan
             Start-Sleep -Seconds 2
