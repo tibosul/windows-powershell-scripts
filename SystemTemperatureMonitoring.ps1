@@ -306,47 +306,48 @@ Utilizator: $env:USERNAME
 }
 
 function Main-TemperatureMonitoring {
-    Clear-Host
-    Write-Host "============================================" -ForegroundColor Cyan
-    Write-Host "     MONITORIZARE TEMPERATURA SISTEM     " -ForegroundColor Cyan
-    Write-Host "============================================" -ForegroundColor Cyan
-    Write-Host ""
-    Write-Host "  [1] Verificare temperatura CPU" -ForegroundColor White
-    Write-Host "  [2] Scanare completa temperaturi" -ForegroundColor White
-    Write-Host "  [3] Monitorizare sanatate sistem" -ForegroundColor White
-    Write-Host "  [4] Monitorizare continua (timp real)" -ForegroundColor White
-    Write-Host "  [5] Export log temperaturi" -ForegroundColor White
-    Write-Host "  [6] Raport complet (toate optiunile)" -ForegroundColor White
-    Write-Host "  [0] Inapoi" -ForegroundColor Red
-    Write-Host ""
+    do {
+        Clear-Host
+        Write-Host "============================================" -ForegroundColor Cyan
+        Write-Host "     MONITORIZARE TEMPERATURA SISTEM     " -ForegroundColor Cyan
+        Write-Host "============================================" -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "  [1] Verificare temperatura CPU" -ForegroundColor White
+        Write-Host "  [2] Scanare completa temperaturi" -ForegroundColor White
+        Write-Host "  [3] Monitorizare sanatate sistem" -ForegroundColor White
+        Write-Host "  [4] Monitorizare continua (timp real)" -ForegroundColor White
+        Write-Host "  [5] Export log temperaturi" -ForegroundColor White
+        Write-Host "  [6] Raport complet (toate optiunile)" -ForegroundColor White
+        Write-Host "  [0] Inapoi" -ForegroundColor Red
+        Write-Host ""
 
-    $choice = Read-Host "Alege optiunea"
+        $choice = Read-Host "Alege optiunea"
 
-    switch ($choice) {
-        "1" { Get-CPUTemperature }
-        "2" { Get-SystemTemperatures }
-        "3" { Monitor-SystemHealth }
-        "4" { Start-ContinuousMonitoring }
-        "5" { Export-TemperatureLog }
-        "6" {
-            Get-CPUTemperature
-            Get-SystemTemperatures
-            Monitor-SystemHealth
-            Export-TemperatureLog
+        switch ($choice) {
+            "1" { Get-CPUTemperature }
+            "2" { Get-SystemTemperatures }
+            "3" { Monitor-SystemHealth }
+            "4" { Start-ContinuousMonitoring }
+            "5" { Export-TemperatureLog }
+            "6" {
+                Get-CPUTemperature
+                Get-SystemTemperatures
+                Monitor-SystemHealth
+                Export-TemperatureLog
+            }
+            "0" { break }
+            default {
+                Write-Host "[ERROR] Optiune invalida!" -ForegroundColor Red
+                Start-Sleep 2
+                continue
+            }
         }
-        "0" { return }
-        default {
-            Write-Host "[ERROR] Optiune invalida!" -ForegroundColor Red
-            Start-Sleep 2
-            Main-TemperatureMonitoring
-        }
-    }
 
-    if ($choice -ne "0" -and $choice -ne "4") {
-        Write-Host "`n[INFO] Operatiune completa! Apasa Enter pentru a continua..."
-        Read-Host
-        Main-TemperatureMonitoring
-    }
+        if ($choice -ne "0" -and $choice -ne "4") {
+            Write-Host "`n[INFO] Operatiune completa! Apasa Enter pentru a continua..."
+            Read-Host
+        }
+    } while ($choice -ne "0")
 }
 
 # Ruleaza functia principala daca script-ul este executat direct
