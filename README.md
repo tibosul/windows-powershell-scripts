@@ -1,4 +1,6 @@
-# 📁 Scripts Directory - Overview
+# 🛠️ Windows PowerShell Scripts Collection
+
+**Collection of PowerShell scripts for Windows system optimization, maintenance, and automation**
 
 ## 🎯 **Main Scripts:**
 
@@ -44,13 +46,10 @@
 ## 📊 **Monitoring Scripts:**
 
 ### **[Monitor.ps1](Monitor.ps1)**
-📈 **System monitoring base script**
-
-### **[Monitor_Clean.ps1](Monitor_Clean.ps1)**
-📈 **Cleaned monitoring script**
-
-### **[Monitor_Fixed.ps1](Monitor_Fixed.ps1)**
-📈 **Fixed monitoring script**
+📈 **System monitoring script**
+- Live system resource monitoring
+- CPU, Memory, Disk usage tracking
+- Press 'q' to exit
 
 ---
 
