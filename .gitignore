@@ -1,0 +1,51 @@
+# PowerShell Scripts Repository - .gitignore
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# Log files
+*.log
+*.txt
+*.csv
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Windows specific
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# PowerShell specific
+*.pssc
+*.vscode/
+
+# Exclude any generated reports or outputs
+*Report_*.txt
+*Backup_*
+EventLogs_*
+
+# Exclude any local configuration files that might contain sensitive info
+*_local.ps1
+*_config.ps1
+secrets.ps1
+
+# Exclude any test or temporary scripts (but keep our test files that are intentional)
+temp_*.ps1
+debug_*.ps1
+
+# Node modules if any JavaScript tools are used
+node_modules/
+
+# Python cache if any Python tools are used
+__pycache__/
+*.pyc
+
+# Keep our intentional documentation and backup files
+!README.md
+!*_Documentation.md
+!PowerShell_Profile_Backup.ps1
