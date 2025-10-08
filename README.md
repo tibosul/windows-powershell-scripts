@@ -64,6 +64,12 @@
 - Create restore points before major optimizations
 - Read documentation before first use
 
+## 🔒 **Anti-Blocking Features:**
+- ✅ All scripts have timeout protection - no infinite hanging
+- ✅ Smart defaults when timeouts occur (safe behavior)
+- ✅ Can run in automated/scheduled tasks without user input
+- 📖 See [ANTI_BLOCKING_IMPROVEMENTS.md](ANTI_BLOCKING_IMPROVEMENTS.md) for details
+
 ---
 
-**Last Updated:** September 18, 2025
+**Last Updated:** January 18, 2025
