@@ -352,10 +352,20 @@ function Start-ContinuousMonitoring {
     try {
         $counter = 0
         $startTime = Get-Date
+        $maxRuntime = New-TimeSpan -Hours 2  # Maximum 2 ore de rulare
+        
         while ($true) {
             $counter++
             $currentTime = Get-Date
             $runtime = $currentTime - $startTime
+            
+            # Verifică timeout maxim
+            if ($runtime -gt $maxRuntime) {
+                Write-Host ""
+                Write-Host "⏱️ Timeout maxim atins (2 ore). Monitorizare oprită automat." -ForegroundColor Yellow
+                Write-Log "Monitorizare oprită automat după $($runtime.TotalMinutes) minute" "INFO"
+                break
+            }
             
             Clear-Host
             Write-Host "╔══════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
