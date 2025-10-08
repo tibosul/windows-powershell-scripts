@@ -12,8 +12,24 @@ if (-not $isAdmin) {
     Write-Host "💡 Unele funcții pot să nu funcționeze corect fără privilegii de administrator." -ForegroundColor Yellow
     Write-Host "🔄 Pentru funcționalitate completă, rulează PowerShell ca Administrator." -ForegroundColor Cyan
     Write-Host ""
-    $continue = Read-Host "Dorești să continui oricum? (Y/N)"
-    if ($continue.ToUpper() -ne "Y") {
+    Write-Host "Dorești să continui oricum? (Y/N - timeout 30 secunde): " -NoNewline
+    
+    # Timeout de 30 secunde pentru răspuns
+    $timeout = 30
+    $startTime = Get-Date
+    $continue = ""
+    
+    while (((Get-Date) - $startTime).TotalSeconds -lt $timeout -and $continue -eq "") {
+        if ([Console]::KeyAvailable) {
+            $key = [Console]::ReadKey($true)
+            $continue = $key.KeyChar
+            Write-Host $continue
+            break
+        }
+        Start-Sleep -Milliseconds 100
+    }
+    
+    if ($continue -eq "" -or $continue.ToString().ToUpper() -ne "Y") {
         Write-Host "❌ Script anulat." -ForegroundColor Red
         exit
     }
