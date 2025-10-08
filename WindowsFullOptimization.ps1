@@ -192,11 +192,29 @@ Write-Host "💾 RAM Usage: $([math]::Round($memUsed, 2))%"
 
 if (-not $NoRestart) {
     Write-Host "`n⚠️  Restart recomandat pentru aplicarea tuturor optimizărilor!" -ForegroundColor Yellow
-    $restart = Read-Host "Dorești să repornești acum? (Y/N)"
-    if ($restart -eq 'Y') {
+    Write-Host "Dorești să repornești acum? (Y/N - timeout 30 secunde): " -NoNewline
+    
+    # Timeout de 30 secunde pentru răspuns
+    $timeout = 30
+    $startTime = Get-Date
+    $restart = ""
+    
+    while (((Get-Date) - $startTime).TotalSeconds -lt $timeout -and $restart -eq "") {
+        if ([Console]::KeyAvailable) {
+            $key = [Console]::ReadKey($true)
+            $restart = $key.KeyChar
+            Write-Host $restart
+            break
+        }
+        Start-Sleep -Milliseconds 100
+    }
+    
+    if ($restart -eq 'Y' -or $restart -eq 'y') {
         Write-Host "Repornire în 10 secunde..." -ForegroundColor Red
         Start-Sleep -Seconds 10
         Restart-Computer -Force
+    } elseif ($restart -eq "") {
+        Write-Host "`n⏱️ Timeout - nu se repornește" -ForegroundColor Yellow
     }
 }
 

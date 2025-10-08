@@ -27,8 +27,24 @@ Write-Host ""
 Write-Host "⚠️  ATENȚIE: Scriptul va șterge fișiere temporare și cache!" -ForegroundColor Yellow
 Write-Host "💡 Asigură-te că ai salvat toate lucrările înainte de a continua." -ForegroundColor Yellow
 Write-Host ""
-$confirmation = Read-Host "Dorești să continui? (Y/N)"
-if ($confirmation.ToUpper() -ne "Y") {
+Write-Host "Dorești să continui? (Y/N - timeout 30 secunde): " -NoNewline
+
+# Timeout de 30 secunde pentru răspuns
+$timeout = 30
+$startTime = Get-Date
+$confirmation = ""
+
+while (((Get-Date) - $startTime).TotalSeconds -lt $timeout -and $confirmation -eq "") {
+    if ([Console]::KeyAvailable) {
+        $key = [Console]::ReadKey($true)
+        $confirmation = $key.KeyChar
+        Write-Host $confirmation
+        break
+    }
+    Start-Sleep -Milliseconds 100
+}
+
+if ($confirmation -eq "" -or $confirmation.ToString().ToUpper() -ne "Y") {
     Write-Host "❌ Curățarea a fost anulată." -ForegroundColor Red
     exit
 }
@@ -194,10 +210,30 @@ Write-Host "Alege opțiunea:" -ForegroundColor White
 Write-Host "  [Y] Da, repornește PC-ul" -ForegroundColor Green
 Write-Host "  [N] Nu, nu reporni acum" -ForegroundColor Red
 Write-Host ""
-do {
-    $restartChoice = Read-Host "Introdu alegerea (Y/N)"
-    $restartChoice = $restartChoice.ToUpper()
-} while ($restartChoice -ne "Y" -and $restartChoice -ne "N")
+
+# Timeout de 30 secunde pentru răspuns
+Write-Host "Introdu alegerea (Y/N - timeout 30 secunde): " -NoNewline
+$timeout = 30
+$startTime = Get-Date
+$restartChoice = ""
+
+while (((Get-Date) - $startTime).TotalSeconds -lt $timeout) {
+    if ([Console]::KeyAvailable) {
+        $key = [Console]::ReadKey($true)
+        $char = $key.KeyChar.ToString().ToUpper()
+        if ($char -eq "Y" -or $char -eq "N") {
+            $restartChoice = $char
+            Write-Host $restartChoice
+            break
+        }
+    }
+    Start-Sleep -Milliseconds 100
+}
+
+if ($restartChoice -eq "") {
+    Write-Host "`n⏱️ Timeout - nu se repornește" -ForegroundColor Yellow
+    $restartChoice = "N"
+}
 
 if ($restartChoice -eq "Y") {
     Write-Host ""

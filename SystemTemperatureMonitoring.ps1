@@ -352,10 +352,20 @@ function Start-ContinuousMonitoring {
     try {
         $counter = 0
         $startTime = Get-Date
+        $maxRuntime = New-TimeSpan -Hours 2  # Maximum 2 ore de rulare
+        
         while ($true) {
             $counter++
             $currentTime = Get-Date
             $runtime = $currentTime - $startTime
+            
+            # Verifică timeout maxim
+            if ($runtime -gt $maxRuntime) {
+                Write-Host ""
+                Write-Host "⏱️ Timeout maxim atins (2 ore). Monitorizare oprită automat." -ForegroundColor Yellow
+                Write-Log "Monitorizare oprită automat după $($runtime.TotalMinutes) minute" "INFO"
+                break
+            }
             
             Clear-Host
             Write-Host "╔══════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
@@ -587,7 +597,34 @@ function Show-TemperatureMonitoringMenu {
         Write-Host "  [0] ❌ Înapoi" -ForegroundColor Red
         Write-Host ""
 
-        $choice = Read-Host "Alege opțiunea"
+        Write-Host "Alege opțiunea (timeout 5 minute): " -NoNewline
+        
+        # Timeout de 5 minute pentru selecție
+        $timeout = 300
+        $startTime = Get-Date
+        $choice = ""
+        
+        while (((Get-Date) - $startTime).TotalSeconds -lt $timeout -and $choice -eq "") {
+            if ([Console]::KeyAvailable) {
+                $key = [Console]::ReadKey($true)
+                if ($key.Key -eq "Enter") {
+                    Write-Host ""
+                    break
+                } elseif ($key.Key -eq "Backspace" -and $choice.Length -gt 0) {
+                    $choice = $choice.Substring(0, $choice.Length - 1)
+                    Write-Host "`b `b" -NoNewline
+                } elseif ($key.KeyChar -match '[0-7]') {
+                    $choice = $key.KeyChar
+                    Write-Host $choice -NoNewline
+                }
+            }
+            Start-Sleep -Milliseconds 50
+        }
+        
+        if ($choice -eq "") {
+            Write-Host "`n⏱️ Timeout - ieșire din meniu" -ForegroundColor Yellow
+            break
+        }
 
         switch ($choice) {
             "1" { Get-CPUTemperature }
@@ -622,8 +659,19 @@ function Show-TemperatureMonitoringMenu {
 
         if ($choice -ne "0" -and $choice -ne "4" -and $choice -ne "7") {
             Write-Host ""
-            Write-Host "✅ Operațiune completă! Apasă Enter pentru a continua..." -ForegroundColor Green
-            Read-Host
+            Write-Host "✅ Operațiune completă! Apasă Enter pentru a continua (timeout 60 secunde)..." -ForegroundColor Green
+            
+            # Timeout pentru continuare
+            $timeout = 60
+            $startTime = Get-Date
+            
+            while (((Get-Date) - $startTime).TotalSeconds -lt $timeout) {
+                if ([Console]::KeyAvailable) {
+                    $null = [Console]::ReadKey($true)
+                    break
+                }
+                Start-Sleep -Milliseconds 100
+            }
         }
     } while ($choice -ne "0")
     

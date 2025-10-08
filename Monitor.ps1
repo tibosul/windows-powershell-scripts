@@ -61,7 +61,18 @@ function Show-Help {
     Write-Host "  • Disk: < $($alertThresholds.Disk) GB liber" -ForegroundColor White
     Write-Host ""
     Write-Host "Apasă orice tastă pentru a reveni la monitorizare..." -ForegroundColor Gray
-    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    
+    # Timeout pentru help screen
+    $timeout = 30
+    $startTime = Get-Date
+    
+    while (((Get-Date) - $startTime).TotalSeconds -lt $timeout) {
+        if ([Console]::KeyAvailable) {
+            $null = [Console]::ReadKey($true)
+            break
+        }
+        Start-Sleep -Milliseconds 100
+    }
 }
 
 function Save-SystemSnapshot {
@@ -124,8 +135,20 @@ function Save-SystemSnapshot {
 
 Write-Log "Pornire monitorizare sistem" "INFO"
 
+# Variabilă pentru numărul maxim de cicluri (opțional)
+$maxCycles = 1200  # 1200 cicluri × 3 secunde = 1 oră maximum
+$cycleCount = 0
+
 while($true) {
     $updateCount++
+    $cycleCount++
+    
+    # Ieșire automată după maxCycles pentru a preveni rularea la nesfârșit
+    if ($cycleCount -ge $maxCycles) {
+        Write-Host "`n⏱️ Timeout maxim atins (1 oră). Monitorizare oprită automat." -ForegroundColor Yellow
+        Write-Log "Monitorizare oprită automat după $maxCycles cicluri" "INFO"
+        break
+    }
     
     # Verifica input utilizator
     if ([Console]::KeyAvailable) {

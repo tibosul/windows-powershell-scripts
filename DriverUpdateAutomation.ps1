@@ -71,9 +71,28 @@ function Update-SystemDrivers {
             Write-Log "Driver disponibil: $($driver.Title)" "INFO"
         }
 
-        # Confirmă actualizarea
-        $response = Read-Host "`n❓ Dorești să instalezi aceste drivere? (y/N)"
-        if ($response -eq 'y' -or $response -eq 'Y') {
+        # Confirmă actualizarea cu timeout
+        Write-Host "`n❓ Dorești să instalezi aceste drivere? (y/N - timeout 60 secunde): " -NoNewline
+        
+        $timeout = 60
+        $startTime = Get-Date
+        $response = ""
+        
+        while (((Get-Date) - $startTime).TotalSeconds -lt $timeout -and $response -eq "") {
+            if ([Console]::KeyAvailable) {
+                $key = [Console]::ReadKey($true)
+                $response = $key.KeyChar
+                Write-Host $response
+                break
+            }
+            Start-Sleep -Milliseconds 100
+        }
+        
+        if ($response -eq "") {
+            Write-Host "`n⏱️ Timeout - instalare anulată" -ForegroundColor Yellow
+            Write-Log "Actualizare anulată prin timeout" "WARNING"
+        }
+        elseif ($response -eq 'y' -or $response -eq 'Y') {
             Write-Log "Utilizatorul a confirmat instalarea driverelor" "INFO"
             Write-Host "`n⬇️ Descărcare și instalare drivere..." -ForegroundColor Cyan
             Install-WindowsUpdate -Category "Drivers" -AcceptAll -AutoReboot:$false
@@ -239,8 +258,29 @@ function Update-DriversWithChocolatey {
         $chocoCheck = Get-Command choco -ErrorAction SilentlyContinue
         if (-not $chocoCheck) {
             Write-Log "Chocolatey nu este instalat pe acest sistem" "WARNING"
-            Write-Host "💡 Dorești să instalezi Chocolatey? (Y/N)" -ForegroundColor Yellow
-            $installChoco = Read-Host
+            Write-Host "💡 Dorești să instalezi Chocolatey? (Y/N - timeout 30 secunde): " -ForegroundColor Yellow -NoNewline
+            
+            $timeout = 30
+            $startTime = Get-Date
+            $installChoco = ""
+            
+            while (((Get-Date) - $startTime).TotalSeconds -lt $timeout -and $installChoco -eq "") {
+                if ([Console]::KeyAvailable) {
+                    $key = [Console]::ReadKey($true)
+                    $installChoco = $key.KeyChar
+                    Write-Host $installChoco
+                    break
+                }
+                Start-Sleep -Milliseconds 100
+            }
+            
+            if ($installChoco -eq "" -or ($installChoco -ne 'Y' -and $installChoco -ne 'y')) {
+                if ($installChoco -eq "") {
+                    Write-Host "`n⏱️ Timeout - instalare anulată" -ForegroundColor Yellow
+                }
+                Write-Log "Instalare Chocolatey anulată" "INFO"
+                return
+            }
             
             if ($installChoco -eq 'Y' -or $installChoco -eq 'y') {
                 Write-Log "Instalare Chocolatey" "INFO"
@@ -339,7 +379,34 @@ function Show-DriverUpdateMenu {
     Write-Host "  [0] ❌ Înapoi" -ForegroundColor Red
     Write-Host ""
 
-    $choice = Read-Host "Alege opțiunea"
+    Write-Host "Alege opțiunea (timeout 5 minute): " -NoNewline
+    
+    # Timeout de 5 minute pentru selecție
+    $timeout = 300
+    $startTime = Get-Date
+    $choice = ""
+    
+    while (((Get-Date) - $startTime).TotalSeconds -lt $timeout -and $choice -eq "") {
+        if ([Console]::KeyAvailable) {
+            $key = [Console]::ReadKey($true)
+            if ($key.Key -eq "Enter") {
+                Write-Host ""
+                break
+            } elseif ($key.Key -eq "Backspace" -and $choice.Length -gt 0) {
+                $choice = $choice.Substring(0, $choice.Length - 1)
+                Write-Host "`b `b" -NoNewline
+            } elseif ($key.KeyChar -match '[0-8]') {
+                $choice = $key.KeyChar
+                Write-Host $choice -NoNewline
+            }
+        }
+        Start-Sleep -Milliseconds 50
+    }
+    
+    if ($choice -eq "") {
+        Write-Host "`n⏱️ Timeout - ieșire din meniu" -ForegroundColor Yellow
+        return
+    }
 
     switch ($choice) {
         "1" { Show-DriverReport }
@@ -372,8 +439,20 @@ function Show-DriverUpdateMenu {
         }
     }
 
-    Write-Host "`n✅ Operațiune completă! Apasă Enter pentru a continua..."
-    Read-Host
+    Write-Host "`n✅ Operațiune completă! Apasă Enter pentru a continua (timeout 60 secunde)..."
+    
+    # Timeout pentru continuare
+    $timeout = 60
+    $startTime = Get-Date
+    
+    while (((Get-Date) - $startTime).TotalSeconds -lt $timeout) {
+        if ([Console]::KeyAvailable) {
+            $null = [Console]::ReadKey($true)
+            break
+        }
+        Start-Sleep -Milliseconds 100
+    }
+    
     Show-DriverUpdateMenu
 }
 

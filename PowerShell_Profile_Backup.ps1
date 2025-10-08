@@ -249,7 +249,32 @@ function SQL-Manager {
         Write-Host "  4. Deschide SQL Server Management Studio"
         Write-Host "  0. Anulare"
 
-        $choice = Read-Host "`nAlege opțiunea"
+        Write-Host "`nAlege opțiunea (timeout 30 secunde): " -NoNewline
+        
+        # Timeout de 30 secunde pentru răspuns
+        $timeout = 30
+        $startTime = Get-Date
+        $choice = ""
+        
+        while (((Get-Date) - $startTime).TotalSeconds -lt $timeout -and $choice -eq "") {
+            if ([Console]::KeyAvailable) {
+                $key = [Console]::ReadKey($true)
+                if ($key.Key -eq "Enter") {
+                    Write-Host ""
+                    break
+                } elseif ($key.KeyChar -match '[0-4]') {
+                    $choice = $key.KeyChar
+                    Write-Host $choice
+                    break
+                }
+            }
+            Start-Sleep -Milliseconds 100
+        }
+        
+        if ($choice -eq "") {
+            Write-Host "`n⏱️ Timeout - nicio opțiune selectată" -ForegroundColor Yellow
+            return
+        }
 
         switch ($choice) {
             '1' {
@@ -352,23 +377,32 @@ if ($diskC) {
 
 # Verifică dacă sunt actualizări disponibile (nu blochează)
 $job = Start-Job -ScriptBlock {
-    $updates = winget upgrade --include-unknown 2>$null
-    if ($updates -match "upgrades available") {
-        $count = ($updates | Select-String "upgrades available").Matches[0].Value.Split()[0]
-        return $count
+    try {
+        $updates = winget upgrade --include-unknown 2>$null
+        if ($updates -match "upgrades available") {
+            $count = ($updates | Select-String "upgrades available").Matches[0].Value.Split()[0]
+            return $count
+        }
+    } catch {
+        # Ignoră erorile
     }
     return 0
 }
 
-# Așteaptă max 2 secunde pentru verificare
-$result = Wait-Job $job -Timeout 2
+# Așteaptă max 3 secunde pentru verificare (redus de la 2 pentru mai multă siguranță)
+$result = Wait-Job $job -Timeout 3
 if ($result) {
-    $updateCount = Receive-Job $job
-    if ($updateCount -gt 0) {
-        Write-Host "  📦 $updateCount actualizări disponibile (scrie 'update' pentru a instala)" -ForegroundColor Yellow
-        Write-Host ""
+    try {
+        $updateCount = Receive-Job $job -ErrorAction SilentlyContinue
+        if ($updateCount -gt 0) {
+            Write-Host "  📦 $updateCount actualizări disponibile (scrie 'update' pentru a instala)" -ForegroundColor Yellow
+            Write-Host ""
+        }
+    } catch {
+        # Ignoră erorile la citirea rezultatului
     }
 }
+# Curăță job-ul indiferent de rezultat
 Remove-Job $job -Force -ErrorAction SilentlyContinue
 
 # END OF PROFILE

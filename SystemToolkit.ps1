@@ -12,8 +12,24 @@ if (-not $isAdmin) {
     Write-Host "💡 Unele funcții pot să nu funcționeze corect fără privilegii de administrator." -ForegroundColor Yellow
     Write-Host "🔄 Pentru funcționalitate completă, rulează PowerShell ca Administrator." -ForegroundColor Cyan
     Write-Host ""
-    $continue = Read-Host "Dorești să continui oricum? (Y/N)"
-    if ($continue.ToUpper() -ne "Y") {
+    Write-Host "Dorești să continui oricum? (Y/N): " -NoNewline
+    
+    # Timeout de 30 secunde pentru răspuns
+    $timeout = 30
+    $startTime = Get-Date
+    $continue = ""
+    
+    while (((Get-Date) - $startTime).TotalSeconds -lt $timeout -and $continue -eq "") {
+        if ([Console]::KeyAvailable) {
+            $key = [Console]::ReadKey($true)
+            $continue = $key.KeyChar
+            Write-Host $continue
+            break
+        }
+        Start-Sleep -Milliseconds 100
+    }
+    
+    if ($continue -eq "" -or $continue.ToString().ToUpper() -ne "Y") {
         Write-Host "❌ SystemToolkit anulat." -ForegroundColor Red
         exit
     }
@@ -715,10 +731,27 @@ $(Get-PhysicalDisk | ForEach-Object {
     $report | Out-File $reportPath
     
     Write-Host "✅ Raport salvat: $reportPath" -ForegroundColor Green
-    Write-Host "`nDorești să deschizi raportul? (Y/N): " -NoNewline
-    $open = Read-Host
-    if ($open -eq 'Y') {
+    Write-Host "`nDorești să deschizi raportul? (Y/N - 10 secunde timeout): " -NoNewline
+    
+    # Timeout de 10 secunde pentru răspuns
+    $timeout = 10
+    $startTime = Get-Date
+    $open = ""
+    
+    while (((Get-Date) - $startTime).TotalSeconds -lt $timeout -and $open -eq "") {
+        if ([Console]::KeyAvailable) {
+            $key = [Console]::ReadKey($true)
+            $open = $key.KeyChar
+            Write-Host $open
+            break
+        }
+        Start-Sleep -Milliseconds 100
+    }
+    
+    if ($open -eq 'Y' -or $open -eq 'y') {
         Start-Process notepad.exe $reportPath
+    } else {
+        Write-Host ""
     }
 }
 
@@ -727,7 +760,34 @@ Write-Log "Pornire SystemToolkit" "INFO"
 
 do {
     Show-Menu
-    $selection = Read-Host "Alege o opțiune"
+    Write-Host "Alege o opțiune (timeout 5 minute): " -NoNewline
+    
+    # Citire input cu timeout de 5 minute pentru a preveni blocarea indefinită
+    $timeout = 300 # 5 minute
+    $startTime = Get-Date
+    $selection = ""
+    
+    while (((Get-Date) - $startTime).TotalSeconds -lt $timeout -and $selection -eq "") {
+        if ([Console]::KeyAvailable) {
+            $key = [Console]::ReadKey($true)
+            if ($key.Key -eq "Enter") {
+                Write-Host ""
+                break
+            } elseif ($key.Key -eq "Backspace" -and $selection.Length -gt 0) {
+                $selection = $selection.Substring(0, $selection.Length - 1)
+                Write-Host "`b `b" -NoNewline
+            } elseif ($key.KeyChar -match '[0-9]') {
+                $selection += $key.KeyChar
+                Write-Host $key.KeyChar -NoNewline
+            }
+        }
+        Start-Sleep -Milliseconds 50
+    }
+    
+    if ($selection -eq "") {
+        Write-Host "`n⏱️ Timeout - nicio opțiune selectată. Ieșire..." -ForegroundColor Yellow
+        $selection = '0'
+    }
     
     switch ($selection) {
         # CURĂȚARE & OPTIMIZARE
@@ -820,7 +880,18 @@ do {
     }
     
     if ($selection -ne '0') {
-        Write-Host "`nApasă orice tastă pentru a continua..."
-        $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        Write-Host "`nApasă orice tastă pentru a continua (timeout 60 secunde)..."
+        
+        # Timeout pentru continuare
+        $timeout = 60
+        $startTime = Get-Date
+        
+        while (((Get-Date) - $startTime).TotalSeconds -lt $timeout) {
+            if ([Console]::KeyAvailable) {
+                $null = [Console]::ReadKey($true)
+                break
+            }
+            Start-Sleep -Milliseconds 100
+        }
     }
 } while ($selection -ne '0')
