@@ -1,101 +1,360 @@
 # ===============================
 # Script: SystemToolkit.ps1
 # Toolkit complet cu meniu interactiv
+# Versiune îmbunătățită cu integrare completă
 # ===============================
+
+# Verificare privilegii Administrator
+$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+
+if (-not $isAdmin) {
+    Write-Host "⚠️ ATENȚIE: SystemToolkit nu rulează ca Administrator!" -ForegroundColor Red
+    Write-Host "💡 Unele funcții pot să nu funcționeze corect fără privilegii de administrator." -ForegroundColor Yellow
+    Write-Host "🔄 Pentru funcționalitate completă, rulează PowerShell ca Administrator." -ForegroundColor Cyan
+    Write-Host ""
+    $continue = Read-Host "Dorești să continui oricum? (Y/N)"
+    if ($continue.ToUpper() -ne "Y") {
+        Write-Host "❌ SystemToolkit anulat." -ForegroundColor Red
+        exit
+    }
+    Write-Host "✅ Continuare cu privilegii limitate..." -ForegroundColor Yellow
+    Write-Host ""
+}
+
+# Configurare logging
+$logPath = "$env:TEMP\SystemToolkit_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
+$global:LogEnabled = $true
+
+function Write-Log {
+    param([string]$Message, [string]$Level = "INFO")
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $logEntry = "[$timestamp] [$Level] $Message"
+    
+    if ($global:LogEnabled) {
+        Add-Content -Path $logPath -Value $logEntry -ErrorAction SilentlyContinue
+    }
+    
+    # Afișează în consolă cu culori
+    switch ($Level) {
+        "ERROR" { Write-Host $logEntry -ForegroundColor Red }
+        "WARNING" { Write-Host $logEntry -ForegroundColor Yellow }
+        "SUCCESS" { Write-Host $logEntry -ForegroundColor Green }
+        default { Write-Host $logEntry -ForegroundColor White }
+    }
+}
 
 function Show-Menu {
     Clear-Host
-    Write-Host "╔══════════════════════════════════════════╗" -ForegroundColor Cyan
-    Write-Host "║            SYSTEM TOOLKIT                ║" -ForegroundColor Cyan
-    Write-Host "╚══════════════════════════════════════════╝" -ForegroundColor Cyan
     Write-Host ""
+    Write-Host "╔══════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
+    Write-Host "║                    🛠️ SYSTEM TOOLKIT 🛠️                 ║" -ForegroundColor Cyan
+    Write-Host "║                  ✨ Versiune Completă ✨                ║" -ForegroundColor Magenta
+    Write-Host "╚══════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "📄 Log fișier: $logPath" -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "╔══════════════════════════════════════════════════════════╗" -ForegroundColor Yellow
+    Write-Host "║                    🧹 CURĂȚARE & OPTIMIZARE              ║" -ForegroundColor Yellow
+    Write-Host "╚══════════════════════════════════════════════════════════╝" -ForegroundColor Yellow
     Write-Host "  [1] 🧹 Curățare rapidă (Temp + Cache)" -ForegroundColor White
-    Write-Host "  [2] 🚀 Optimizare completă sistem" -ForegroundColor White
-    Write-Host "  [3] 📦 Actualizare toate aplicațiile" -ForegroundColor White
-    Write-Host "  [4] 🛡️  Scanare securitate completă" -ForegroundColor White
-    Write-Host "  [5] 🔧 Reparare fișiere sistem (SFC + DISM)" -ForegroundColor White
-    Write-Host "  [6] 🌐 Reset complet rețea" -ForegroundColor White
-    Write-Host "  [7] 💾 Backup Registry + Restore Point" -ForegroundColor White
-    Write-Host "  [8] 📊 Raport complet sistem" -ForegroundColor White
-    Write-Host "  [9] ⚡ Optimizare SQL Server" -ForegroundColor White
-    Write-Host "  [10] 🔍 Găsește fișiere mari (>1GB)" -ForegroundColor White
-    Write-Host "  [11] 🎮 Mod Gaming (Optimizare pentru jocuri)" -ForegroundColor White
-    Write-Host "  [12] 📝 Verificare și instalare C++ Redistributables" -ForegroundColor White
-    Write-Host "  [13] 🔄 Repornire servicii Windows blocat" -ForegroundColor White
-    Write-Host "  [14] 🗑️  Uninstall bloatware Windows 11" -ForegroundColor White
-    Write-Host "  [15] 📸 Screenshot toate erorile din Event Log" -ForegroundColor White
-    Write-Host "  [16] 🔧 Actualizare automată drivere" -ForegroundColor White
-    Write-Host "  [17] 🌡️ Monitorizare temperatură sistem" -ForegroundColor White
+    Write-Host "  [2] 🚀 Optimizare completă sistem (WindowsFullOptimization)" -ForegroundColor White
+    Write-Host "  [3] 🌊 Curățare avansată (CleanSafeSurface)" -ForegroundColor White
+    Write-Host "  [4] 📅 Mentenanță săptămânală (WeeklyMaintenance)" -ForegroundColor White
+    Write-Host ""
+    Write-Host "╔══════════════════════════════════════════════════════════╗" -ForegroundColor Green
+    Write-Host "║                    📦 ACTUALIZARE & DRIVERE             ║" -ForegroundColor Green
+    Write-Host "╚══════════════════════════════════════════════════════════╝" -ForegroundColor Green
+    Write-Host "  [5] 📦 Actualizare toate aplicațiile (Winget + Choco)" -ForegroundColor White
+    Write-Host "  [6] 🔧 Actualizare automată drivere (DriverUpdateAutomation)" -ForegroundColor White
+    Write-Host "  [7] 🐧 Actualizare WSL și distribuții Linux (UpdateWSL)" -ForegroundColor White
+    Write-Host ""
+    Write-Host "╔══════════════════════════════════════════════════════════╗" -ForegroundColor Red
+    Write-Host "║                    🛡️ SECURITATE & REPARARE             ║" -ForegroundColor Red
+    Write-Host "╚══════════════════════════════════════════════════════════╝" -ForegroundColor Red
+    Write-Host "  [8] 🛡️  Scanare securitate completă (Windows Defender)" -ForegroundColor White
+    Write-Host "  [9] 🔧 Reparare fișiere sistem (SFC + DISM)" -ForegroundColor White
+    Write-Host "  [10] 🌐 Reset complet rețea" -ForegroundColor White
+    Write-Host "  [11] 🔄 Repornire servicii Windows blocat" -ForegroundColor White
+    Write-Host "  [12] 💾 Backup Registry + Restore Point" -ForegroundColor White
+    Write-Host ""
+    Write-Host "╔══════════════════════════════════════════════════════════╗" -ForegroundColor Blue
+    Write-Host "║                    📊 MONITORIZARE & RAPOARTE            ║" -ForegroundColor Blue
+    Write-Host "╚══════════════════════════════════════════════════════════╝" -ForegroundColor Blue
+    Write-Host "  [13] 📊 Raport complet sistem" -ForegroundColor White
+    Write-Host "  [14] 🌡️ Monitorizare temperatură sistem (SystemTemperatureMonitoring)" -ForegroundColor White
+    Write-Host "  [15] 📈 Monitorizare în timp real (Monitor)" -ForegroundColor White
+    Write-Host "  [16] 📸 Export erori Event Log" -ForegroundColor White
+    Write-Host ""
+    Write-Host "╔══════════════════════════════════════════════════════════╗" -ForegroundColor Magenta
+    Write-Host "║                    ⚙️ OPTIMIZARE & UTILITARE            ║" -ForegroundColor Magenta
+    Write-Host "╚══════════════════════════════════════════════════════════╝" -ForegroundColor Magenta
+    Write-Host "  [17] 🎮 Mod Gaming (Optimizare pentru jocuri)" -ForegroundColor White
+    Write-Host "  [18] ⚡ Optimizare SQL Server" -ForegroundColor White
+    Write-Host "  [19] 🔍 Găsește fișiere mari (>1GB)" -ForegroundColor White
+    Write-Host "  [20] 📝 Verificare și instalare C++ Redistributables" -ForegroundColor White
+    Write-Host "  [21] 🗑️  Uninstall bloatware Windows 11" -ForegroundColor White
+    Write-Host ""
+    Write-Host "╔══════════════════════════════════════════════════════════╗" -ForegroundColor DarkCyan
+    Write-Host "║                    🔧 UTILITARE SISTEM                  ║" -ForegroundColor DarkCyan
+    Write-Host "╚══════════════════════════════════════════════════════════╝" -ForegroundColor DarkCyan
+    Write-Host "  [22] 💾 Backup PowerShell Profile (PowerShell_Profile_Backup)" -ForegroundColor White
+    Write-Host "  [23] 📄 Afișează log-ul intern" -ForegroundColor Yellow
     Write-Host ""
     Write-Host "  [0] ❌ Ieșire" -ForegroundColor Red
     Write-Host ""
-    Write-Host "══════════════════════════════════════════" -ForegroundColor Cyan
+    Write-Host "══════════════════════════════════════════════════════════" -ForegroundColor Cyan
 }
 
-function Quick-Clean {
+function Start-QuickClean {
+    Write-Log "Începere curățare rapidă" "INFO"
     Write-Host "`n🧹 CURĂȚARE RAPIDĂ..." -ForegroundColor Yellow
     
-    # Calculează spațiu înainte
-    $before = Get-PSDrive C | Select-Object -ExpandProperty Free
-    
-    # Curățare
-    Remove-Item "$env:TEMP\*" -Force -Recurse -ErrorAction SilentlyContinue
-    Remove-Item "C:\Windows\Temp\*" -Force -Recurse -ErrorAction SilentlyContinue
-    Remove-Item "C:\Windows\Prefetch\*" -Force -Recurse -ErrorAction SilentlyContinue
-    Clear-RecycleBin -Force -ErrorAction SilentlyContinue
-    
-    # Calculează spațiu după
-    $after = Get-PSDrive C | Select-Object -ExpandProperty Free
-    $freed = [math]::Round(($after - $before) / 1MB, 2)
-    
-    Write-Host "✅ Curățare completă! Spațiu eliberat: $freed MB" -ForegroundColor Green
+    try {
+        # Calculează spațiu înainte
+        $before = Get-PSDrive C | Select-Object -ExpandProperty Free
+        
+        # Curățare
+        Write-Host "  • Curățare fișiere temporare..." -ForegroundColor Cyan
+        Remove-Item "$env:TEMP\*" -Force -Recurse -ErrorAction SilentlyContinue
+        Remove-Item "C:\Windows\Temp\*" -Force -Recurse -ErrorAction SilentlyContinue
+        Remove-Item "C:\Windows\Prefetch\*" -Force -Recurse -ErrorAction SilentlyContinue
+        
+        Write-Host "  • Curățare Recycle Bin..." -ForegroundColor Cyan
+        Clear-RecycleBin -Force -ErrorAction SilentlyContinue
+        
+        # Calculează spațiu după
+        $after = Get-PSDrive C | Select-Object -ExpandProperty Free
+        $freed = [math]::Round(($after - $before) / 1MB, 2)
+        
+        Write-Log "Curățare rapidă completată cu succes. Spațiu eliberat: $freed MB" "SUCCESS"
+        Write-Host "✅ Curățare completă! Spațiu eliberat: $freed MB" -ForegroundColor Green
+    } catch {
+        Write-Log "Eroare la curățarea rapidă: $($_.Exception.Message)" "ERROR"
+        Write-Host "❌ Eroare la curățare: $($_.Exception.Message)" -ForegroundColor Red
+    }
 }
 
 function Update-AllApps {
+    Write-Log "Începere actualizare aplicații" "INFO"
     Write-Host "`n📦 ACTUALIZARE APLICAȚII..." -ForegroundColor Yellow
     
-    # Winget
-    Write-Host "  • Actualizare via Winget..."
-    winget upgrade --all --silent --accept-package-agreements --accept-source-agreements
-    
-    # Chocolatey (dacă este instalat)
-    if (Get-Command choco -ErrorAction SilentlyContinue) {
-        Write-Host "  • Actualizare via Chocolatey..."
-        choco upgrade all -y
+    try {
+        # Winget
+        Write-Host "  • Actualizare via Winget..." -ForegroundColor Cyan
+        if (Get-Command winget -ErrorAction SilentlyContinue) {
+            winget upgrade --all --silent --accept-package-agreements --accept-source-agreements 2>&1 | Out-Null
+            Write-Log "Actualizare Winget completată" "SUCCESS"
+        } else {
+            Write-Log "Winget nu este disponibil" "WARNING"
+            Write-Host "    ⚠️ Winget nu este disponibil" -ForegroundColor Yellow
+        }
+        
+        # Chocolatey (dacă este instalat)
+        if (Get-Command choco -ErrorAction SilentlyContinue) {
+            Write-Host "  • Actualizare via Chocolatey..." -ForegroundColor Cyan
+            choco upgrade all -y 2>&1 | Out-Null
+            Write-Log "Actualizare Chocolatey completată" "SUCCESS"
+        } else {
+            Write-Log "Chocolatey nu este instalat" "INFO"
+        }
+        
+        # Microsoft Store
+        Write-Host "  • Actualizare Microsoft Store apps..." -ForegroundColor Cyan
+        try {
+            Get-CimInstance -Namespace "root\cimv2\mdm\dmmap" -ClassName "MDM_EnterpriseModernAppManagement_AppManagement01" | 
+                Invoke-CimMethod -MethodName UpdateScanMethod | Out-Null
+            Write-Log "Actualizare Microsoft Store completată" "SUCCESS"
+        } catch {
+            Write-Log "Eroare la actualizarea Microsoft Store: $($_.Exception.Message)" "WARNING"
+        }
+        
+        Write-Log "Actualizare aplicații completată cu succes" "SUCCESS"
+        Write-Host "✅ Toate aplicațiile au fost actualizate!" -ForegroundColor Green
+    } catch {
+        Write-Log "Eroare la actualizarea aplicațiilor: $($_.Exception.Message)" "ERROR"
+        Write-Host "❌ Eroare la actualizarea aplicațiilor: $($_.Exception.Message)" -ForegroundColor Red
     }
-    
-    # Microsoft Store
-    Write-Host "  • Actualizare Microsoft Store apps..."
-    Get-CimInstance -Namespace "root\cimv2\mdm\dmmap" -ClassName "MDM_EnterpriseModernAppManagement_AppManagement01" | 
-        Invoke-CimMethod -MethodName UpdateScanMethod | Out-Null
-    
-    Write-Host "✅ Toate aplicațiile au fost actualizate!" -ForegroundColor Green
 }
 
-function Security-Scan {
+function Start-CleanSafeSurface {
+    Write-Log "Lansare CleanSafeSurface" "INFO"
+    Write-Host "`n🌊 CURĂȚARE AVANSATĂ (CleanSafeSurface)..." -ForegroundColor Yellow
+    
+    try {
+        if (Test-Path "$PSScriptRoot\CleanSafeSurface.ps1") {
+            & "$PSScriptRoot\CleanSafeSurface.ps1"
+            Write-Log "CleanSafeSurface executat cu succes" "SUCCESS"
+        } else {
+            Write-Log "CleanSafeSurface.ps1 nu a fost găsit" "ERROR"
+            Write-Host "❌ CleanSafeSurface.ps1 nu a fost găsit!" -ForegroundColor Red
+        }
+    } catch {
+        Write-Log "Eroare la executarea CleanSafeSurface: $($_.Exception.Message)" "ERROR"
+        Write-Host "❌ Eroare la executarea CleanSafeSurface: $($_.Exception.Message)" -ForegroundColor Red
+    }
+}
+
+function Start-WeeklyMaintenance {
+    Write-Log "Lansare WeeklyMaintenance" "INFO"
+    Write-Host "`n📅 MENTENANȚĂ SĂPTĂMÂNALĂ (WeeklyMaintenance)..." -ForegroundColor Yellow
+    
+    try {
+        if (Test-Path "$PSScriptRoot\WeeklyMaintenance.ps1") {
+            & "$PSScriptRoot\WeeklyMaintenance.ps1"
+            Write-Log "WeeklyMaintenance executat cu succes" "SUCCESS"
+        } else {
+            Write-Log "WeeklyMaintenance.ps1 nu a fost găsit" "ERROR"
+            Write-Host "❌ WeeklyMaintenance.ps1 nu a fost găsit!" -ForegroundColor Red
+        }
+    } catch {
+        Write-Log "Eroare la executarea WeeklyMaintenance: $($_.Exception.Message)" "ERROR"
+        Write-Host "❌ Eroare la executarea WeeklyMaintenance: $($_.Exception.Message)" -ForegroundColor Red
+    }
+}
+
+function Start-DriverUpdateAutomation {
+    Write-Log "Lansare DriverUpdateAutomation" "INFO"
+    Write-Host "`n🔧 ACTUALIZARE AUTOMATĂ DRIVERE (DriverUpdateAutomation)..." -ForegroundColor Yellow
+    
+    try {
+        if (Test-Path "$PSScriptRoot\DriverUpdateAutomation.ps1") {
+            & "$PSScriptRoot\DriverUpdateAutomation.ps1"
+            Write-Log "DriverUpdateAutomation executat cu succes" "SUCCESS"
+        } else {
+            Write-Log "DriverUpdateAutomation.ps1 nu a fost găsit" "ERROR"
+            Write-Host "❌ DriverUpdateAutomation.ps1 nu a fost găsit!" -ForegroundColor Red
+        }
+    } catch {
+        Write-Log "Eroare la executarea DriverUpdateAutomation: $($_.Exception.Message)" "ERROR"
+        Write-Host "❌ Eroare la executarea DriverUpdateAutomation: $($_.Exception.Message)" -ForegroundColor Red
+    }
+}
+
+function Start-UpdateWSL {
+    Write-Log "Lansare UpdateWSL" "INFO"
+    Write-Host "`n🐧 ACTUALIZARE WSL ȘI DISTRIBUȚII LINUX (UpdateWSL)..." -ForegroundColor Yellow
+    
+    try {
+        if (Test-Path "$PSScriptRoot\UpdateWSL.ps1") {
+            & "$PSScriptRoot\UpdateWSL.ps1"
+            Write-Log "UpdateWSL executat cu succes" "SUCCESS"
+        } else {
+            Write-Log "UpdateWSL.ps1 nu a fost găsit" "ERROR"
+            Write-Host "❌ UpdateWSL.ps1 nu a fost găsit!" -ForegroundColor Red
+        }
+    } catch {
+        Write-Log "Eroare la executarea UpdateWSL: $($_.Exception.Message)" "ERROR"
+        Write-Host "❌ Eroare la executarea UpdateWSL: $($_.Exception.Message)" -ForegroundColor Red
+    }
+}
+
+function Start-SystemTemperatureMonitoring {
+    Write-Log "Lansare SystemTemperatureMonitoring" "INFO"
+    Write-Host "`n🌡️ MONITORIZARE TEMPERATURĂ SISTEM (SystemTemperatureMonitoring)..." -ForegroundColor Yellow
+    
+    try {
+        if (Test-Path "$PSScriptRoot\SystemTemperatureMonitoring.ps1") {
+            & "$PSScriptRoot\SystemTemperatureMonitoring.ps1"
+            Write-Log "SystemTemperatureMonitoring executat cu succes" "SUCCESS"
+        } else {
+            Write-Log "SystemTemperatureMonitoring.ps1 nu a fost găsit" "ERROR"
+            Write-Host "❌ SystemTemperatureMonitoring.ps1 nu a fost găsit!" -ForegroundColor Red
+        }
+    } catch {
+        Write-Log "Eroare la executarea SystemTemperatureMonitoring: $($_.Exception.Message)" "ERROR"
+        Write-Host "❌ Eroare la executarea SystemTemperatureMonitoring: $($_.Exception.Message)" -ForegroundColor Red
+    }
+}
+
+function Start-Monitor {
+    Write-Log "Lansare Monitor" "INFO"
+    Write-Host "`n📈 MONITORIZARE ÎN TIMP REAL (Monitor)..." -ForegroundColor Yellow
+    
+    try {
+        if (Test-Path "$PSScriptRoot\Monitor.ps1") {
+            & "$PSScriptRoot\Monitor.ps1"
+            Write-Log "Monitor executat cu succes" "SUCCESS"
+        } else {
+            Write-Log "Monitor.ps1 nu a fost găsit" "ERROR"
+            Write-Host "❌ Monitor.ps1 nu a fost găsit!" -ForegroundColor Red
+        }
+    } catch {
+        Write-Log "Eroare la executarea Monitor: $($_.Exception.Message)" "ERROR"
+        Write-Host "❌ Eroare la executarea Monitor: $($_.Exception.Message)" -ForegroundColor Red
+    }
+}
+
+function Start-PowerShellProfileBackup {
+    Write-Log "Lansare PowerShell_Profile_Backup" "INFO"
+    Write-Host "`n💾 BACKUP POWERSHELL PROFILE (PowerShell_Profile_Backup)..." -ForegroundColor Yellow
+    
+    try {
+        if (Test-Path "$PSScriptRoot\PowerShell_Profile_Backup.ps1") {
+            & "$PSScriptRoot\PowerShell_Profile_Backup.ps1"
+            Write-Log "PowerShell_Profile_Backup executat cu succes" "SUCCESS"
+        } else {
+            Write-Log "PowerShell_Profile_Backup.ps1 nu a fost găsit" "ERROR"
+            Write-Host "❌ PowerShell_Profile_Backup.ps1 nu a fost găsit!" -ForegroundColor Red
+        }
+    } catch {
+        Write-Log "Eroare la executarea PowerShell_Profile_Backup: $($_.Exception.Message)" "ERROR"
+        Write-Host "❌ Eroare la executarea PowerShell_Profile_Backup: $($_.Exception.Message)" -ForegroundColor Red
+    }
+}
+
+function Show-InternalLog {
+    Write-Log "Afișare log intern" "INFO"
+    Write-Host "`n📄 LOG INTERN SYSTEMTOOLKIT:" -ForegroundColor Yellow
+    Write-Host "═══════════════════════════════════════" -ForegroundColor Cyan
+    
+    if (Test-Path $logPath) {
+        try {
+            Get-Content $logPath | ForEach-Object { Write-Host $_ }
+            Write-Host "═══════════════════════════════════════" -ForegroundColor Cyan
+            Write-Host "📄 Log complet: $logPath" -ForegroundColor Gray
+        } catch {
+            Write-Host "❌ Eroare la citirea log-ului: $($_.Exception.Message)" -ForegroundColor Red
+        }
+    } else {
+        Write-Host "❌ Log-ul intern nu a fost găsit!" -ForegroundColor Red
+    }
+}
+
+function Start-SecurityScan {
+    Write-Log "Începere scanare securitate" "INFO"
     Write-Host "`n🛡️ SCANARE SECURITATE..." -ForegroundColor Yellow
     
-    # Update definitions
-    Write-Host "  • Actualizare definiții antivirus..."
-    Update-MpSignature -ErrorAction SilentlyContinue
-    
-    # Full scan
-    Write-Host "  • Pornire scanare completă (va rula în background)..."
-    Start-MpScan -ScanType FullScan -AsJob
-    
-    # Check threats
-    $threats = Get-MpThreatDetection -ErrorAction SilentlyContinue
-    if ($threats) {
-        Write-Host "  ⚠️ AMENINȚĂRI DETECTATE!" -ForegroundColor Red
-        $threats | ForEach-Object { Write-Host "    - $($_.ThreatName)" }
-    } else {
-        Write-Host "  ✓ Nu au fost detectate amenințări" -ForegroundColor Green
+    try {
+        # Update definitions
+        Write-Host "  • Actualizare definiții antivirus..." -ForegroundColor Cyan
+        Update-MpSignature -ErrorAction SilentlyContinue
+        Write-Log "Definiții antivirus actualizate" "SUCCESS"
+        
+        # Full scan
+        Write-Host "  • Pornire scanare completă (va rula în background)..." -ForegroundColor Cyan
+        Start-MpScan -ScanType FullScan -AsJob
+        Write-Log "Scanare completă pornită în background" "SUCCESS"
+        
+        # Check threats
+        $threats = Get-MpThreatDetection -ErrorAction SilentlyContinue
+        if ($threats) {
+            Write-Host "  ⚠️ AMENINȚĂRI DETECTATE!" -ForegroundColor Red
+            $threats | ForEach-Object { Write-Host "    - $($_.ThreatName)" }
+            Write-Log "Amenințări detectate: $($threats.Count)" "WARNING"
+        } else {
+            Write-Host "  ✓ Nu au fost detectate amenințări" -ForegroundColor Green
+            Write-Log "Nu au fost detectate amenințări" "SUCCESS"
+        }
+        
+        Write-Log "Scanare securitate inițiată cu succes" "SUCCESS"
+        Write-Host "✅ Scanare inițiată!" -ForegroundColor Green
+    } catch {
+        Write-Log "Eroare la scanarea de securitate: $($_.Exception.Message)" "ERROR"
+        Write-Host "❌ Eroare la scanarea de securitate: $($_.Exception.Message)" -ForegroundColor Red
     }
-    
-    Write-Host "✅ Scanare inițiată!" -ForegroundColor Green
 }
 
-function Network-Reset {
+function Start-NetworkReset {
     Write-Host "`n🌐 RESET COMPLET REȚEA..." -ForegroundColor Yellow
     
     Write-Host "  • Reset Winsock..."
@@ -165,7 +424,7 @@ function Optimize-SQLServer {
 function Find-LargeFiles {
     Write-Host "`n🔍 CĂUTARE FIȘIERE MARI (>1GB)..." -ForegroundColor Yellow
     
-    $drives = Get-PSDrive -PSProvider FileSystem | Where-Object {$_.Free -ne $null}
+    $drives = Get-PSDrive -PSProvider FileSystem | Where-Object {$null -ne $_.Free}
     $largeFiles = @()
     
     foreach ($drive in $drives) {
@@ -186,7 +445,7 @@ function Find-LargeFiles {
     }
 }
 
-function Gaming-Mode {
+function Start-GamingMode {
     Write-Host "`n🎮 ACTIVARE MOD GAMING..." -ForegroundColor Yellow
     
     # Dezactivare servicii inutile pentru gaming
@@ -274,7 +533,7 @@ function Install-VCRedist {
             if (-not $isInstalled) {
                 # Încearcă instalarea cu ID-ul principal
                 Write-Host "    → Instalare $($vcredist.Primary)..."
-                $result = winget install --id $vcredist.Primary --silent --accept-package-agreements --accept-source-agreements 2>$null
+                winget install --id $vcredist.Primary --silent --accept-package-agreements --accept-source-agreements 2>$null | Out-Null
                 
                 if ($LASTEXITCODE -ne 0 -and $vcredist.Alternative) {
                     Write-Host "    → Încerc ID alternativ $($vcredist.Alternative)..."
@@ -409,7 +668,7 @@ $((Get-EventLog -LogName System -EntryType Error -Newest 100 | Group-Object Sour
     Write-Host "✅ Logs exportate în: $exportPath" -ForegroundColor Green
 }
 
-function System-Report {
+function Start-SystemReport {
     Write-Host "`n📊 GENERARE RAPORT SISTEM..." -ForegroundColor Yellow
     
     $report = @"
@@ -429,7 +688,7 @@ Total: $([math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemor
 Disponibil: $([math]::Round((Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory / 1MB, 2)) MB
 
 🗄️ STOCARE:
-$(Get-PSDrive -PSProvider FileSystem | Where-Object {$_.Free -ne $null} | ForEach-Object {
+$(Get-PSDrive -PSProvider FileSystem | Where-Object {$null -ne $_.Free} | ForEach-Object {
     "Drive $($_.Name): $([math]::Round($_.Used/1GB, 2))GB folosit / $([math]::Round(($_.Used+$_.Free)/1GB, 2))GB total"
 } | Out-String)
 
@@ -464,56 +723,98 @@ $(Get-PhysicalDisk | ForEach-Object {
 }
 
 # MAIN LOOP
+Write-Log "Pornire SystemToolkit" "INFO"
+
 do {
     Show-Menu
     $selection = Read-Host "Alege o opțiune"
     
     switch ($selection) {
-        '1' { Quick-Clean }
+        # CURĂȚARE & OPTIMIZARE
+        '1' { Start-QuickClean }
         '2' { 
             Write-Host "`n⚠️ Aceasta va dura câteva minute..." -ForegroundColor Yellow
-            & "$PSScriptRoot\WindowsFullOptimization.ps1"
+            Write-Log "Lansare WindowsFullOptimization" "INFO"
+            try {
+                if (Test-Path "$PSScriptRoot\WindowsFullOptimization.ps1") {
+                    & "$PSScriptRoot\WindowsFullOptimization.ps1"
+                    Write-Log "WindowsFullOptimization executat cu succes" "SUCCESS"
+                } else {
+                    Write-Log "WindowsFullOptimization.ps1 nu a fost găsit" "ERROR"
+                    Write-Host "❌ WindowsFullOptimization.ps1 nu a fost găsit!" -ForegroundColor Red
+                }
+            } catch {
+                Write-Log "Eroare la executarea WindowsFullOptimization: $($_.Exception.Message)" "ERROR"
+                Write-Host "❌ Eroare la executarea WindowsFullOptimization: $($_.Exception.Message)" -ForegroundColor Red
+            }
         }
-        '3' { Update-AllApps }
-        '4' { Security-Scan }
-        '5' {
+        '3' { Start-CleanSafeSurface }
+        '4' { Start-WeeklyMaintenance }
+        
+        # ACTUALIZARE & DRIVERE
+        '5' { Update-AllApps }
+        '6' { Start-DriverUpdateAutomation }
+        '7' { Start-UpdateWSL }
+        
+        # SECURITATE & REPARARE
+        '8' { Start-SecurityScan }
+        '9' {
             Write-Host "`n🔧 REPARARE SISTEM..." -ForegroundColor Yellow
-            Write-Host "  • Rulez SFC..."
-            sfc /scannow
-            Write-Host "  • Rulez DISM..."
-            DISM /Online /Cleanup-Image /RestoreHealth
-            Write-Host "✅ Reparare completă!" -ForegroundColor Green
+            Write-Log "Începere reparare sistem (SFC + DISM)" "INFO"
+            try {
+                Write-Host "  • Rulez SFC..." -ForegroundColor Cyan
+                sfc /scannow
+                Write-Host "  • Rulez DISM..." -ForegroundColor Cyan
+                DISM /Online /Cleanup-Image /RestoreHealth
+                Write-Log "Reparare sistem completată cu succes" "SUCCESS"
+                Write-Host "✅ Reparare completă!" -ForegroundColor Green
+            } catch {
+                Write-Log "Eroare la repararea sistemului: $($_.Exception.Message)" "ERROR"
+                Write-Host "❌ Eroare la repararea sistemului: $($_.Exception.Message)" -ForegroundColor Red
+            }
         }
-        '6' { Network-Reset }
-        '7' {
+        '10' { Start-NetworkReset }
+        '11' { Restart-WindowsServices }
+        '12' {
             Write-Host "`n💾 BACKUP..." -ForegroundColor Yellow
-            Enable-ComputerRestore -Drive "C:\"
-            Checkpoint-Computer -Description "Manual Backup $(Get-Date)" -RestorePointType "MODIFY_SETTINGS"
-            Write-Host "✅ Restore point creat!" -ForegroundColor Green
+            Write-Log "Creare restore point" "INFO"
+            try {
+                Enable-ComputerRestore -Drive "C:\"
+                Checkpoint-Computer -Description "Manual Backup $(Get-Date)" -RestorePointType "MODIFY_SETTINGS"
+                Write-Log "Restore point creat cu succes" "SUCCESS"
+                Write-Host "✅ Restore point creat!" -ForegroundColor Green
+            } catch {
+                Write-Log "Eroare la crearea restore point: $($_.Exception.Message)" "ERROR"
+                Write-Host "❌ Eroare la crearea restore point: $($_.Exception.Message)" -ForegroundColor Red
+            }
         }
-        '8' { System-Report }
-        '9' { Optimize-SQLServer }
-        '10' { Find-LargeFiles }
-        '11' { Gaming-Mode }
-        '12' { Install-VCRedist }
-        '13' { Restart-WindowsServices }
-        '14' { Remove-Bloatware }
-        '15' { Export-EventLogs }
-        '16' {
-            Write-Host "`n🔧 ACTUALIZARE DRIVERE..." -ForegroundColor Yellow
-            & "$PSScriptRoot\DriverUpdateAutomation.ps1"
-        }
-        '17' {
-            Write-Host "`n🌡️ MONITORIZARE TEMPERATURĂ..." -ForegroundColor Yellow
-            & "$PSScriptRoot\SystemTemperatureMonitoring.ps1"
-        }
+        
+        # MONITORIZARE & RAPOARTE
+        '13' { Start-SystemReport }
+        '14' { Start-SystemTemperatureMonitoring }
+        '15' { Start-Monitor }
+        '16' { Export-EventLogs }
+        
+        # OPTIMIZARE & UTILITARE
+        '17' { Start-GamingMode }
+        '18' { Optimize-SQLServer }
+        '19' { Find-LargeFiles }
+        '20' { Install-VCRedist }
+        '21' { Remove-Bloatware }
+        
+        # UTILITARE SISTEM
+        '22' { Start-PowerShellProfileBackup }
+        '23' { Show-InternalLog }
+        
         '0' {
             Write-Host "`n👋 La revedere!" -ForegroundColor Cyan
+            Write-Log "SystemToolkit închis de utilizator" "INFO"
             Start-Sleep -Seconds 2
             exit
         }
         default {
             Write-Host "`n⚠️ Opțiune invalidă!" -ForegroundColor Red
+            Write-Log "Opțiune invalidă selectată: $selection" "ERROR"
             Start-Sleep -Seconds 2
         }
     }

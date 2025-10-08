@@ -359,7 +359,7 @@ function Start-ContinuousMonitoring {
             
             Clear-Host
             Write-Host "╔══════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-            Write-Host "║            🔴 MONITORIZARE ÎN TIMP REAL               ║" -ForegroundColor Cyan
+            Write-Host "║                  MONITORIZARE ÎN TIMP REAL               ║" -ForegroundColor Cyan
             Write-Host "╚══════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
             Write-Host "🕒 Timp: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" -ForegroundColor Gray
             Write-Host "🔄 Ciclu: $counter" -ForegroundColor Gray
